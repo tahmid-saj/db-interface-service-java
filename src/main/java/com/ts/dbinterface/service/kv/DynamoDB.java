@@ -71,7 +71,7 @@ public class DynamoDB implements KeyValueStore {
     }
 
     // List tables
-    public List<String> listTables(String tableName) {
+    public List<String> listTables() {
         ListTablesRequest request;
         boolean moreTables = true;
         String lastTableName = null;
@@ -170,10 +170,10 @@ public class DynamoDB implements KeyValueStore {
     }
 
     // Read item
-    public AttributeValue readItem(String tableName, String primaryKeyName, String primaryKeyValue, String projectionExpression) {
+    public Map<String, AttributeValue> readItem(String tableName, String primaryKeyName, String primaryKeyValue, String projectionExpression) {
         HashMap<String, AttributeValue> keyToGet = new HashMap<String, AttributeValue>();
         keyToGet.put(primaryKeyName, new AttributeValue(primaryKeyValue));
-        AttributeValue returnedValue = null;
+        Map<String, AttributeValue> returnedKeyValuePairs = new HashMap<>();
 
         GetItemRequest request = null;
         if (projectionExpression != null) {
@@ -188,12 +188,11 @@ public class DynamoDB implements KeyValueStore {
         }
 
         try {
-            Map<String, AttributeValue> returnedItem =
-                    ddb.getItem(request).getItem();
+            Map<String, AttributeValue> returnedItem = ddb.getItem(request).getItem();
             if (returnedItem != null) {
                 Set<String> keys = returnedItem.keySet();
                 for (String key : keys) {
-                    returnedValue = returnedItem.get(key);
+                    returnedKeyValuePairs.put(key, returnedItem.get(key));
                     System.out.format("%s: %s\n", key, returnedItem.get(key).toString());
                 }
             } else {
@@ -204,7 +203,7 @@ public class DynamoDB implements KeyValueStore {
             System.exit(1);
         }
 
-        return returnedValue;
+        return returnedKeyValuePairs;
     }
 
     // Add item
