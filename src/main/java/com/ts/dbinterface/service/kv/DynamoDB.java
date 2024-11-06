@@ -135,6 +135,17 @@ public class DynamoDB implements KeyValueStore {
     }
 
     // Update a table
+    public void updateTable(String tableName, long newReadCapacity, long newWriteCapacity) {
+        ProvisionedThroughput tableThroughput = new ProvisionedThroughput(newReadCapacity, newWriteCapacity);
+
+        try {
+            ddb.updateTable(tableName, tableThroughput);
+            System.out.println("Table was updated");
+        } catch (AmazonServiceException e) {
+            System.err.println(e.getErrorMessage());
+            System.exit(1);
+        }
+    }
 
     // Delete a table
 
