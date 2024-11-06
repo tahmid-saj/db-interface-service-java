@@ -4,8 +4,14 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.model.*;
+import com.ts.dbinterface.utils.exceptions.kv.dynamodb.DynamoDBErrorResponse;
+import com.ts.dbinterface.utils.exceptions.kv.dynamodb.DynamoDBException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import javax.validation.Valid;
 import java.util.*;
 
 @Service
@@ -26,8 +32,10 @@ public class DynamoDB implements KeyValueStore {
         this.ddb = client;
     }
 
+    // Table operations
+
     // Creates a table with a simple primary key
-    public boolean createTable(String tableName, String primaryKey, long readCapacity, long writeCapacity) {
+    public boolean createTable(@Valid String tableName, @Valid String primaryKey, long readCapacity, long writeCapacity) {
         CreateTableRequest request = new CreateTableRequest()
                 .withAttributeDefinitions(new AttributeDefinition(primaryKey, ScalarAttributeType.S))
                 .withKeySchema(new KeySchemaElement(primaryKey, KeyType.HASH))
@@ -40,13 +48,12 @@ public class DynamoDB implements KeyValueStore {
             return true;
         } catch (AmazonServiceException e) {
             System.err.println("Failed to create table: " + e.getErrorMessage());
+            throw new DynamoDBException("Failed to create table: " + e.getErrorMessage());
         }
-
-        return false;
     }
 
     // Creates a table with a composite primary key
-    public boolean createTable(String tableName, String firstKey, String secondKey, long readCapacity, long writeCapacity) {
+    public boolean createTable(@Valid String tableName, @Valid String firstKey, @Valid String secondKey, long readCapacity, long writeCapacity) {
         CreateTableRequest request = new CreateTableRequest()
                 .withAttributeDefinitions(
                         new AttributeDefinition(firstKey, ScalarAttributeType.S),
@@ -65,9 +72,8 @@ public class DynamoDB implements KeyValueStore {
             return true;
         } catch (AmazonServiceException e) {
             System.err.println("Failed to create table: " + e.getErrorMessage());
+            throw new DynamoDBException("Failed to create table: " + e.getErrorMessage());
         }
-
-        return false;
     }
 
     // List tables
@@ -104,6 +110,7 @@ public class DynamoDB implements KeyValueStore {
                 }
             } catch (AmazonServiceException e) {
                 System.err.println("Failed to list tables: " + e.getErrorMessage());
+                throw new DynamoDBException("Failed to list tables: " + e.getErrorMessage());
             }
         }
 
@@ -111,7 +118,7 @@ public class DynamoDB implements KeyValueStore {
     }
 
     // Describe a table
-    public Map<String, String> describeTable(String tableName) {
+    public Map<String, String> describeTable(@Valid String tableName) {
         Map<String, String> tableDescription = new HashMap<>();
 
         try {
@@ -147,14 +154,14 @@ public class DynamoDB implements KeyValueStore {
             }
         } catch (AmazonServiceException e) {
             System.err.println(e.getErrorMessage());
-            System.exit(1);
+            throw new DynamoDBException(e.getErrorMessage());
         }
 
         return tableDescription;
     }
 
     // Update a table
-    public boolean updateTable(String tableName, long newReadCapacity, long newWriteCapacity) {
+    public boolean updateTable(@Valid String tableName, long newReadCapacity, long newWriteCapacity) {
         ProvisionedThroughput tableThroughput = new ProvisionedThroughput(newReadCapacity, newWriteCapacity);
 
         try {
@@ -163,28 +170,62 @@ public class DynamoDB implements KeyValueStore {
             return true;
         } catch (AmazonServiceException e) {
             System.err.println(e.getErrorMessage());
-            System.exit(1);
+            throw new DynamoDBException(e.getErrorMessage());
         }
-
-        return false;
     }
 
     // Delete a table
-    public boolean deleteTable(String tableName) {
+    public boolean deleteTable(@Valid String tableName) {
         try {
             ddb.deleteTable(tableName);
             System.out.println("Table was deleted : " + tableName);
             return true;
         } catch (AmazonServiceException e) {
             System.err.println(e.getErrorMessage());
-            System.exit(1);
+            throw new DynamoDBException(e.getErrorMessage());
+        }
+    }
+
+    // Item operations
+
+    // Read all items
+    public List<Map<String, AttributeValue>> readAllItems(@Valid String tableName, String projectionExpression) {
+        List<Map<String, AttributeValue>> items = new ArrayList<>();
+
+        // Create the scan request
+        ScanRequest scanRequest = new ScanRequest().withTableName(tableName);
+
+        if (projectionExpression != null && !projectionExpression.isEmpty()) {
+            scanRequest.withProjectionExpression(projectionExpression);
         }
 
-        return false;
+        try {
+            // Execute the scan and get all items
+            ScanResult result;
+            do {
+                result = ddb.scan(scanRequest);
+                items.addAll(result.getItems());
+
+                // Print each item
+                for (Map<String, AttributeValue> item : result.getItems()) {
+                    System.out.println("Item: " + item);
+                }
+
+                // Set the start key for the next scan if there are more items
+                scanRequest.setExclusiveStartKey(result.getLastEvaluatedKey());
+
+            } while (result.getLastEvaluatedKey() != null); // Loop if there are more items
+
+        } catch (AmazonServiceException e) {
+            System.err.println(e.getErrorMessage());
+            throw new DynamoDBException(e.getErrorMessage());
+        }
+
+        return items;
     }
 
     // Read item
-    public Map<String, AttributeValue> readItem(String tableName, String primaryKeyName, String primaryKeyValue, String projectionExpression) {
+    public Map<String, AttributeValue> readItem(@Valid String tableName, @Valid String primaryKeyName, String primaryKeyValue, String projectionExpression) {
         HashMap<String, AttributeValue> keyToGet = new HashMap<String, AttributeValue>();
         keyToGet.put(primaryKeyName, new AttributeValue(primaryKeyValue));
         Map<String, AttributeValue> returnedKeyValuePairs = new HashMap<>();
@@ -214,14 +255,14 @@ public class DynamoDB implements KeyValueStore {
             }
         } catch (AmazonServiceException e) {
             System.err.println(e.getErrorMessage());
-            System.exit(1);
+            throw new DynamoDBException(e.getErrorMessage());
         }
 
         return returnedKeyValuePairs;
     }
 
     // Add item
-    public boolean addItem(String tableName, String key, String value, List<String[]> extraFields) {
+    public boolean addItem(@Valid String tableName, @Valid String key, String value, List<String[]> extraFields) {
         HashMap<String,AttributeValue> itemValues = new HashMap<String, AttributeValue>();
 
         itemValues.put(key, new AttributeValue(value));
@@ -235,17 +276,17 @@ public class DynamoDB implements KeyValueStore {
         } catch (ResourceNotFoundException e) {
             System.err.format("Error: The table \"%s\" can't be found.\n", tableName);
             System.err.println("Be sure that it exists and that you've typed its name correctly!");
-            System.exit(1);
+            throw new DynamoDBException(e.getErrorMessage());
         } catch (AmazonServiceException e) {
             System.err.println(e.getMessage());
-            System.exit(1);
+            throw new DynamoDBException(e.getErrorMessage());
         }
 
         return true;
     }
 
     // Update item
-    public boolean updateItem(String tableName, String key, String value, List<String[]> extraFields) {
+    public boolean updateItem(@Valid String tableName, @Valid String key, String value, List<String[]> extraFields) {
         HashMap<String,AttributeValue> itemKey = new HashMap<String, AttributeValue>();
         itemKey.put(key, new AttributeValue(value));
 
@@ -259,17 +300,17 @@ public class DynamoDB implements KeyValueStore {
             ddb.updateItem(tableName, itemKey, updatedValues);
         } catch (ResourceNotFoundException e) {
             System.err.println(e.getMessage());
-            System.exit(1);
+            throw new DynamoDBException(e.getErrorMessage());
         } catch (AmazonServiceException e) {
             System.err.println(e.getMessage());
-            System.exit(1);
+            throw new DynamoDBException(e.getErrorMessage());
         }
 
         return true;
     }
 
     // Delete item
-    public boolean deleteItem(String tableName, String key, String value) {
+    public boolean deleteItem(@Valid String tableName, @Valid String key, String value) {
         HashMap<String, AttributeValue> itemKey = new HashMap<String, AttributeValue>();
         itemKey.put(key, new AttributeValue(value));
 
@@ -282,12 +323,34 @@ public class DynamoDB implements KeyValueStore {
         } catch (ResourceNotFoundException e) {
             System.err.format("Error: The table \"%s\" can't be found.\n", tableName);
             System.err.println("Be sure that it exists and that you've typed its name correctly!");
-            System.exit(1);
+            throw new DynamoDBException(e.getErrorMessage());
         } catch (AmazonServiceException e) {
             System.err.println(e.getMessage());
-            System.exit(1);
+            throw new DynamoDBException(e.getErrorMessage());
         }
 
         return true;
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<DynamoDBErrorResponse> handleException(DynamoDBException exception) {
+        DynamoDBErrorResponse errorResponse = new DynamoDBErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                exception.getMessage(),
+                System.currentTimeMillis()
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<DynamoDBErrorResponse> handleException(Exception exception) {
+        DynamoDBErrorResponse errorResponse = new DynamoDBErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                exception.getMessage(),
+                System.currentTimeMillis()
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
