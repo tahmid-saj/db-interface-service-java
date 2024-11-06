@@ -6,6 +6,9 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.model.*;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class DynamoDB implements KeyValueStore {
 
@@ -63,7 +66,44 @@ public class DynamoDB implements KeyValueStore {
     }
 
     // List tables
+    public List<String> listTables(String tableName) {
+        ListTablesRequest request;
+        boolean moreTables = true;
+        String lastTableName = null;
+        List<String> tables = new ArrayList<>();
 
+        while (moreTables) {
+            try {
+                if (lastTableName == null) {
+                    request = new ListTablesRequest().withLimit(10);
+                } else {
+                    request = new ListTablesRequest().withLimit(10).withExclusiveStartTableName(lastTableName);
+                }
+
+                ListTablesResult tableList = ddb.listTables(request);
+                List<String> tableNames = tableList.getTableNames();
+
+                if (tableNames.size() > 0) {
+                    for (String currTableName : tableNames) {
+                        tables.add(currTableName);
+                        System.out.format("* %s\n", currTableName);
+                    }
+                } else {
+                    System.out.println("No tables found");
+                    System.exit(0);
+                }
+
+                lastTableName = tableList.getLastEvaluatedTableName();
+                if (lastTableName == null) {
+                    moreTables = false;
+                }
+            } catch (AmazonServiceException e) {
+                System.err.println("Failed to list tables: " + e.getErrorMessage());
+            }
+        }
+
+        return tables;
+    }
 
     // Describe a table
 
