@@ -1,4 +1,4 @@
-package com.ts.dbinterface.dao.kv;
+package com.ts.dbinterface.service.kv;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -39,4 +39,41 @@ public class DynamoDB implements KeyValueStore {
             System.err.println("Failed to create table: " + e.getErrorMessage());
         }
     }
+
+    // Creates a table with a composite primary key
+    public void createTable(String tableName, String firstKey, String secondKey) {
+        CreateTableRequest request = new CreateTableRequest()
+                .withAttributeDefinitions(
+                        new AttributeDefinition(firstKey, ScalarAttributeType.S),
+                        new AttributeDefinition(secondKey, ScalarAttributeType.S)
+                )
+                .withKeySchema(
+                        new KeySchemaElement(firstKey, KeyType.HASH),
+                        new KeySchemaElement(secondKey, KeyType.RANGE)
+                )
+                .withProvisionedThroughput(new ProvisionedThroughput(2L, 2L))
+                .withTableName(tableName);
+
+        try {
+            CreateTableResult result = ddb.createTable(request);
+            System.out.println("Created table: " + result.getTableDescription().getTableName());
+        } catch (AmazonServiceException e) {
+            System.err.println("Failed to create table: " + e.getErrorMessage());
+        }
+    }
+
+    // List tables
+
+
+    // Describe a table
+
+    // Update a table
+
+    // Delete a table
+
+    // Read item
+
+    // Add item
+
+    // Update item
 }
