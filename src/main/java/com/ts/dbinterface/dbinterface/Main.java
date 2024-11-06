@@ -30,13 +30,13 @@ public class Main {
 
 //			dynamoDB.deleteTable("test_table_composite_key");
 
-			List<String[]> extraFields = new ArrayList<>();
-			extraFields.add(new String[]{"attribute_name_4", "attribute_value_9"});
-			extraFields.add(new String[]{"attribute_name_3", "attribute_value_9"});
+//			List<String[]> extraFields = new ArrayList<>();
+//			extraFields.add(new String[]{"attribute_name_4", "attribute_value_9"});
+//			extraFields.add(new String[]{"attribute_name_3", "attribute_value_9"});
 
 //			System.out.println(dynamoDB.addItem("test_table", "test_pk", "123_val", extraFields));
 //			System.out.println(dynamoDB.readItem("test_table", "test_pk", "123_val", null));
-			System.out.println(dynamoDB.updateItem("test_table", "test_pk", "123_val", extraFields));
+//			System.out.println(dynamoDB.updateItem("test_table", "test_pk", "123_val", extraFields));
 		};
 	}
 }

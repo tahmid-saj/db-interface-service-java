@@ -27,11 +27,11 @@ public class DynamoDB implements KeyValueStore {
     }
 
     // Creates a table with a simple primary key
-    public boolean createTable(String tableName, String primaryKey) {
+    public boolean createTable(String tableName, String primaryKey, long readCapacity, long writeCapacity) {
         CreateTableRequest request = new CreateTableRequest()
                 .withAttributeDefinitions(new AttributeDefinition(primaryKey, ScalarAttributeType.S))
                 .withKeySchema(new KeySchemaElement(primaryKey, KeyType.HASH))
-                .withProvisionedThroughput(new ProvisionedThroughput(2L, 2L))
+                .withProvisionedThroughput(new ProvisionedThroughput(readCapacity, writeCapacity))
                 .withTableName(tableName);
 
         try {
