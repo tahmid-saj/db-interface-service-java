@@ -106,6 +106,33 @@ public class DynamoDB implements KeyValueStore {
     }
 
     // Describe a table
+    public void describeTable(String tableName) {
+        try {
+            TableDescription tableInfo = ddb.describeTable(tableName).getTable();
+
+            if (tableInfo != null) {
+                System.out.format("Table name : %s\n", tableInfo.getTableName());
+                System.out.format("Table ARN : %s\n", tableInfo.getTableArn());
+                System.out.format("Status : %s\n", tableInfo.getTableStatus());
+                System.out.format("Item count : %d\n", tableInfo.getItemCount().longValue());
+                System.out.format("Size (bytes) : %d\n", tableInfo.getTableSizeBytes().longValue());
+
+                ProvisionedThroughputDescription throughputInfo = tableInfo.getProvisionedThroughput();
+                System.out.println("Throughput");
+                System.out.format(" Read Capacity : %d\n", throughputInfo.getReadCapacityUnits().longValue());
+                System.out.format(" Write Capacity : %d\n", throughputInfo.getWriteCapacityUnits().longValue());
+
+                List<AttributeDefinition> attributes = tableInfo.getAttributeDefinitions();
+                System.out.println("Attributes");
+                for (AttributeDefinition a : attributes) {
+                    System.out.format(" %s (%s)\n", a.getAttributeName(), a.getAttributeType());
+                }
+            }
+        } catch (AmazonServiceException e) {
+            System.err.println(e.getErrorMessage());
+            System.exit(1);
+        }
+    }
 
     // Update a table
 
