@@ -140,7 +140,7 @@ public class DynamoDB implements KeyValueStore {
 
         try {
             ddb.updateTable(tableName, tableThroughput);
-            System.out.println("Table was updated");
+            System.out.println("Table was updated : " + tableName);
         } catch (AmazonServiceException e) {
             System.err.println(e.getErrorMessage());
             System.exit(1);
@@ -148,6 +148,15 @@ public class DynamoDB implements KeyValueStore {
     }
 
     // Delete a table
+    public void deleteTable(String tableName) {
+        try {
+            ddb.deleteTable(tableName);
+            System.out.println("Table was deleted : " + tableName);
+        } catch (AmazonServiceException e) {
+            System.err.println(e.getErrorMessage());
+            System.exit(1);
+        }
+    }
 
     // Read item
 
