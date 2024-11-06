@@ -6,8 +6,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.model.*;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class DynamoDB implements KeyValueStore {
@@ -28,7 +27,7 @@ public class DynamoDB implements KeyValueStore {
     }
 
     // Creates a table with a simple primary key
-    public void createTable(String tableName, String primaryKey) {
+    public boolean createTable(String tableName, String primaryKey) {
         CreateTableRequest request = new CreateTableRequest()
                 .withAttributeDefinitions(new AttributeDefinition(primaryKey, ScalarAttributeType.S))
                 .withKeySchema(new KeySchemaElement(primaryKey, KeyType.HASH))
@@ -38,13 +37,16 @@ public class DynamoDB implements KeyValueStore {
         try {
             CreateTableResult result = ddb.createTable(request);
             System.out.println("Created table: " + result.getTableDescription().getTableName());
+            return true;
         } catch (AmazonServiceException e) {
             System.err.println("Failed to create table: " + e.getErrorMessage());
         }
+
+        return false;
     }
 
     // Creates a table with a composite primary key
-    public void createTable(String tableName, String firstKey, String secondKey) {
+    public boolean createTable(String tableName, String firstKey, String secondKey) {
         CreateTableRequest request = new CreateTableRequest()
                 .withAttributeDefinitions(
                         new AttributeDefinition(firstKey, ScalarAttributeType.S),
@@ -60,9 +62,12 @@ public class DynamoDB implements KeyValueStore {
         try {
             CreateTableResult result = ddb.createTable(request);
             System.out.println("Created table: " + result.getTableDescription().getTableName());
+            return true;
         } catch (AmazonServiceException e) {
             System.err.println("Failed to create table: " + e.getErrorMessage());
         }
+
+        return false;
     }
 
     // List tables
@@ -135,32 +140,120 @@ public class DynamoDB implements KeyValueStore {
     }
 
     // Update a table
-    public void updateTable(String tableName, long newReadCapacity, long newWriteCapacity) {
+    public boolean updateTable(String tableName, long newReadCapacity, long newWriteCapacity) {
         ProvisionedThroughput tableThroughput = new ProvisionedThroughput(newReadCapacity, newWriteCapacity);
 
         try {
             ddb.updateTable(tableName, tableThroughput);
             System.out.println("Table was updated : " + tableName);
+            return true;
         } catch (AmazonServiceException e) {
             System.err.println(e.getErrorMessage());
             System.exit(1);
         }
+
+        return false;
     }
 
     // Delete a table
-    public void deleteTable(String tableName) {
+    public boolean deleteTable(String tableName) {
         try {
             ddb.deleteTable(tableName);
             System.out.println("Table was deleted : " + tableName);
+            return true;
         } catch (AmazonServiceException e) {
             System.err.println(e.getErrorMessage());
             System.exit(1);
         }
+
+        return false;
     }
 
     // Read item
+    public AttributeValue readItem(String tableName, String primaryKeyName, String primaryKeyValue, String projectionExpression) {
+        HashMap<String, AttributeValue> keyToGet = new HashMap<String, AttributeValue>();
+        keyToGet.put(primaryKeyName, new AttributeValue(primaryKeyValue));
+        AttributeValue returnedValue = null;
+
+        GetItemRequest request = null;
+        if (projectionExpression != null) {
+            request = new GetItemRequest()
+                    .withKey(keyToGet)
+                    .withTableName(tableName)
+                    .withProjectionExpression(projectionExpression);
+        } else {
+            request = new GetItemRequest()
+                    .withKey(keyToGet)
+                    .withTableName(tableName);
+        }
+
+        try {
+            Map<String, AttributeValue> returnedItem =
+                    ddb.getItem(request).getItem();
+            if (returnedItem != null) {
+                Set<String> keys = returnedItem.keySet();
+                for (String key : keys) {
+                    returnedValue = returnedItem.get(key);
+                    System.out.format("%s: %s\n", key, returnedItem.get(key).toString());
+                }
+            } else {
+                System.out.format("No item found with the key %s!\n", primaryKeyValue);
+            }
+        } catch (AmazonServiceException e) {
+            System.err.println(e.getErrorMessage());
+            System.exit(1);
+        }
+
+        return returnedValue;
+    }
 
     // Add item
+    public boolean addItem(String tableName, String key, String value, List<String[]> extraFields) {
+        HashMap<String,AttributeValue> itemValues = new HashMap<String, AttributeValue>();
+
+        itemValues.put(key, new AttributeValue(value));
+
+        for (String[] field : extraFields) {
+            itemValues.put(field[0], new AttributeValue(field[1]));
+        }
+
+        try {
+            ddb.putItem(tableName, itemValues);
+        } catch (ResourceNotFoundException e) {
+            System.err.format("Error: The table \"%s\" can't be found.\n", tableName);
+            System.err.println("Be sure that it exists and that you've typed its name correctly!");
+            System.exit(1);
+        } catch (AmazonServiceException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
+
+        return true;
+    }
 
     // Update item
+    public boolean updateItem(String tableName, String key, String value, List<String[]> extraFields) {
+        HashMap<String,AttributeValue> itemKey = new HashMap<String, AttributeValue>();
+
+        itemKey.put(key, new AttributeValue(value));
+
+        HashMap<String,AttributeValueUpdate> updatedValues = new HashMap<String,AttributeValueUpdate>();
+
+        for (String[] field : extraFields) {
+            updatedValues.put(field[0], new AttributeValueUpdate(new AttributeValue(field[1]), AttributeAction.PUT));
+        }
+
+        try {
+            ddb.updateItem(tableName, itemKey, updatedValues);
+        } catch (ResourceNotFoundException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        } catch (AmazonServiceException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
+
+        return true;
+    }
+
 }
