@@ -7,7 +7,7 @@ import javax.validation.ConstraintValidatorContext;
 
 public class DynamoDBKeyValidator implements ConstraintValidator<DynamoDBKey, String> {
 
-    public static final String VALID_PATTERN = "^[0-9a-zA-Z]*$";
+    public static final String VALID_PATTERN = "^[0-9a-zA-Z_-]*$";
 
     @Override
     public void initialize(DynamoDBKey constraintAnnotation) {

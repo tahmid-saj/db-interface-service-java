@@ -2,7 +2,11 @@ package com.ts.dbinterface.samples.kv.dynamodb.entity;
 
 import com.ts.dbinterface.validation.kv.dynamodb.DynamoDBKey;
 import com.ts.dbinterface.validation.kv.dynamodb.DynamoDBValue;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 
+@Component
+@Lazy
 public class User {
     @DynamoDBKey
     private String userID;
