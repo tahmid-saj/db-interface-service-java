@@ -2,7 +2,13 @@ package com.ts.dbinterface.samples.kv.dynamodb.entity;
 
 import com.ts.dbinterface.validation.kv.dynamodb.DynamoDBKey;
 import com.ts.dbinterface.validation.kv.dynamodb.DynamoDBTableName;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 
+@Component
+@Lazy
 public class DynamoDBTable {
 
     @DynamoDBTableName
@@ -69,5 +75,15 @@ public class DynamoDBTable {
                 ", readCapacity=" + readCapacity +
                 ", writeCapacity=" + writeCapacity +
                 '}';
+    }
+
+    @PostConstruct
+    public void startDynamoDBTable() {
+        System.out.println("New instance of dynamodb table initialized : " + getTableName());
+    }
+
+    @PreDestroy
+    public void closeDynamoDBTable() {
+        System.out.println("Closing instance of dynamodb table : " + getTableName());
     }
 }
