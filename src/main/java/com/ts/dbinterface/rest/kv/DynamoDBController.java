@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ public class DynamoDBController {
         this.dynamoDB = dynamoDB;
     }
 
+//    table operations
     @PostMapping("/tables")
     public boolean createTable(@RequestBody Map<String, Object> dynamoDBTableInput) {
         String tableName = (String)dynamoDBTableInput.get("tableName");
@@ -65,6 +67,12 @@ public class DynamoDBController {
     @DeleteMapping("/tables/{tableName}")
     public boolean deleteTable(@PathVariable String tableName) {
         return dynamoDB.deleteTable(tableName);
+    }
+
+//    item operations
+    @GetMapping("/tables/{tableName}/items")
+    public List<Map<String, AttributeValue>> readAllItems(@PathVariable String tableName) {
+        return dynamoDB.readAllItems(tableName, null);
     }
 
     @GetMapping("/tables/{tableName}/items/{primaryKeyName}/{primaryKeyValue}")
