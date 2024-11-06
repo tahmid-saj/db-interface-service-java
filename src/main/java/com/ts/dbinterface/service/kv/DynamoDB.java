@@ -46,7 +46,7 @@ public class DynamoDB implements KeyValueStore {
     }
 
     // Creates a table with a composite primary key
-    public boolean createTable(String tableName, String firstKey, String secondKey) {
+    public boolean createTable(String tableName, String firstKey, String secondKey, long readCapacity, long writeCapacity) {
         CreateTableRequest request = new CreateTableRequest()
                 .withAttributeDefinitions(
                         new AttributeDefinition(firstKey, ScalarAttributeType.S),
@@ -56,7 +56,7 @@ public class DynamoDB implements KeyValueStore {
                         new KeySchemaElement(firstKey, KeyType.HASH),
                         new KeySchemaElement(secondKey, KeyType.RANGE)
                 )
-                .withProvisionedThroughput(new ProvisionedThroughput(2L, 2L))
+                .withProvisionedThroughput(new ProvisionedThroughput(readCapacity, writeCapacity))
                 .withTableName(tableName);
 
         try {
@@ -111,7 +111,9 @@ public class DynamoDB implements KeyValueStore {
     }
 
     // Describe a table
-    public void describeTable(String tableName) {
+    public Map<String, String> describeTable(String tableName) {
+        Map<String, String> tableDescription = new HashMap<>();
+
         try {
             TableDescription tableInfo = ddb.describeTable(tableName).getTable();
 
@@ -127,16 +129,28 @@ public class DynamoDB implements KeyValueStore {
                 System.out.format(" Read Capacity : %d\n", throughputInfo.getReadCapacityUnits().longValue());
                 System.out.format(" Write Capacity : %d\n", throughputInfo.getWriteCapacityUnits().longValue());
 
+                tableDescription.put("Table name", tableInfo.getTableName());
+                tableDescription.put("Table ARN", tableInfo.getTableArn());
+                tableDescription.put("Table status", tableInfo.getTableStatus());
+                tableDescription.put("Item count", tableInfo.getItemCount().toString());
+                tableDescription.put("Size (bytes)", tableInfo.getTableSizeBytes().toString());
+                tableDescription.put("Read capacity", throughputInfo.getReadCapacityUnits().toString());
+                tableDescription.put("Write capacity", throughputInfo.getWriteCapacityUnits().toString());
+
                 List<AttributeDefinition> attributes = tableInfo.getAttributeDefinitions();
                 System.out.println("Attributes");
                 for (AttributeDefinition a : attributes) {
                     System.out.format(" %s (%s)\n", a.getAttributeName(), a.getAttributeType());
+
+                    tableDescription.put(a.getAttributeName(), a.getAttributeType());
                 }
             }
         } catch (AmazonServiceException e) {
             System.err.println(e.getErrorMessage());
             System.exit(1);
         }
+
+        return tableDescription;
     }
 
     // Update a table
@@ -233,7 +247,6 @@ public class DynamoDB implements KeyValueStore {
     // Update item
     public boolean updateItem(String tableName, String key, String value, List<String[]> extraFields) {
         HashMap<String,AttributeValue> itemKey = new HashMap<String, AttributeValue>();
-
         itemKey.put(key, new AttributeValue(value));
 
         HashMap<String,AttributeValueUpdate> updatedValues = new HashMap<String,AttributeValueUpdate>();
@@ -255,4 +268,26 @@ public class DynamoDB implements KeyValueStore {
         return true;
     }
 
+    // Delete item
+    public boolean deleteItem(String tableName, String key, String value) {
+        HashMap<String, AttributeValue> itemKey = new HashMap<String, AttributeValue>();
+        itemKey.put(key, new AttributeValue(value));
+
+        DeleteItemRequest deleteItemRequest = new DeleteItemRequest()
+            .withTableName(tableName)
+            .withKey(itemKey);
+
+        try {
+            ddb.deleteItem(deleteItemRequest);
+        } catch (ResourceNotFoundException e) {
+            System.err.format("Error: The table \"%s\" can't be found.\n", tableName);
+            System.err.println("Be sure that it exists and that you've typed its name correctly!");
+            System.exit(1);
+        } catch (AmazonServiceException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
+
+        return true;
+    }
 }
