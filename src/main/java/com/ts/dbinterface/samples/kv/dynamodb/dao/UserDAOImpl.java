@@ -2,7 +2,7 @@ package com.ts.dbinterface.samples.kv.dynamodb.dao;
 
 import com.ts.dbinterface.samples.kv.dynamodb.entity.DynamoDBTable;
 import com.ts.dbinterface.samples.kv.dynamodb.entity.User;
-import com.ts.dbinterface.service.kv.DynamoDB;
+import com.ts.dbinterface.service.kv.dynamodb.DynamoDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

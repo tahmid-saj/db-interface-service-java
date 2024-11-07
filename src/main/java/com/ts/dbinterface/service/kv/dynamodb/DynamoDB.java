@@ -1,4 +1,4 @@
-package com.ts.dbinterface.service.kv;
+package com.ts.dbinterface.service.kv.dynamodb;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;

@@ -4,10 +4,8 @@ import com.ts.dbinterface.samples.kv.dynamodb.dao.UserDAO;
 import com.ts.dbinterface.samples.kv.dynamodb.entity.DynamoDBTable;
 import com.ts.dbinterface.samples.kv.dynamodb.entity.User;
 import com.ts.dbinterface.samples.kv.dynamodb.ops.DynamoDBOps;
-import com.ts.dbinterface.service.kv.DynamoDB;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 // Uncommenting @SpringBootApplication below will run this file
