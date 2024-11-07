@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class MongoDBService implements DocumentStore {
+public class MongoDB implements DocumentStore {
 
     private MongoClient mongoClient;
     private MongoDatabase database;
@@ -29,7 +29,7 @@ public class MongoDBService implements DocumentStore {
     private String mongoDBConnectionString;
 
     @Autowired
-    public MongoDBService() {
+    public MongoDB() {
         try {
             ConnectionString connectionString = new ConnectionString(mongoDBConnectionString);
             this.mongoClient = MongoClients.create(connectionString);
