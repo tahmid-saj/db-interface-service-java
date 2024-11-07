@@ -1,4 +1,4 @@
-package com.ts.dbinterface.service.document.documentdb;
+package com.ts.dbinterface.service.document.mongodb;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.client.MongoClient;
@@ -6,8 +6,8 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.ts.dbinterface.service.document.DocumentStore;
-import com.ts.dbinterface.utils.exceptions.document.documentdb.DocumentDBErrorResponse;
-import com.ts.dbinterface.utils.exceptions.document.documentdb.DocumentDBException;
+import com.ts.dbinterface.utils.exceptions.document.mongodb.MongoDBErrorResponse;
+import com.ts.dbinterface.utils.exceptions.document.mongodb.MongoDBException;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,48 +20,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class DocumentDB implements DocumentStore {
+public class MongoDBService implements DocumentStore {
 
     private MongoClient mongoClient;
     private MongoDatabase database;
 
-    @Value("{mongodb.connectionString}")
+    @Value("${mongodb.connectionString}")
     private String mongoDBConnectionString;
 
     @Autowired
-    public DocumentDB() {
+    public MongoDBService() {
         try {
             ConnectionString connectionString = new ConnectionString(mongoDBConnectionString);
             this.mongoClient = MongoClients.create(connectionString);
             this.database = mongoClient.getDatabase(connectionString.getDatabase());
         } catch (Exception e) {
             System.err.println("Error initializing MongoDB client: " + e.getMessage());
-            throw new DocumentDBException("Failed to initialize DocumentDB client", e);
+            throw new MongoDBException("Failed to initialize MongoDB client", e);
         }
     }
 
     // Add getter for the database if needed
     public MongoDatabase getDatabase() {
         return this.database;
-    }
-
-    // Cluster operations
-    public boolean createDBCluster(String clusterName) {
-        // Logic to create a cluster (not usually performed via MongoDB Java client directly)
-        System.out.println("Cluster creation initiated for: " + clusterName);
-        return true;
-    }
-
-    public boolean modifyDBCluster(String clusterName) {
-        // Logic to modify a cluster configuration
-        System.out.println("Cluster modification initiated for: " + clusterName);
-        return true;
-    }
-
-    public boolean deleteDBCluster(String clusterName) {
-        // Logic to delete a cluster (typically requires AWS SDK or other CLI tools)
-        System.out.println("Cluster deletion initiated for: " + clusterName);
-        return true;
     }
 
     // Collection operations
@@ -71,7 +52,7 @@ public class DocumentDB implements DocumentStore {
             System.out.println("Created collection: " + collectionName);
             return true;
         } catch (Exception e) {
-            throw new DocumentDBException("Failed to create collection: " + collectionName, e);
+            throw new MongoDBException("Failed to create collection: " + collectionName, e);
         }
     }
 
@@ -82,7 +63,7 @@ public class DocumentDB implements DocumentStore {
             System.out.println("Deleted collection: " + collectionName);
             return true;
         } catch (Exception e) {
-            throw new DocumentDBException("Failed to delete collection: " + collectionName, e);
+            throw new MongoDBException("Failed to delete collection: " + collectionName, e);
         }
     }
 
@@ -96,7 +77,7 @@ public class DocumentDB implements DocumentStore {
                 System.out.println("Document: " + doc.toJson());
             }
         } catch (Exception e) {
-            throw new DocumentDBException("Failed to find all documents in collection: " + collectionName, e);
+            throw new MongoDBException("Failed to find all documents in collection: " + collectionName, e);
         }
         return documents;
     }
@@ -112,7 +93,7 @@ public class DocumentDB implements DocumentStore {
             }
             return document;
         } catch (Exception e) {
-            throw new DocumentDBException("Failed to find document in collection: " + collectionName, e);
+            throw new MongoDBException("Failed to find document in collection: " + collectionName, e);
         }
     }
 
@@ -123,7 +104,7 @@ public class DocumentDB implements DocumentStore {
             System.out.println("Inserted document: " + document.toJson());
             return true;
         } catch (Exception e) {
-            throw new DocumentDBException("Failed to insert document into collection: " + collectionName, e);
+            throw new MongoDBException("Failed to insert document into collection: " + collectionName, e);
         }
     }
 
@@ -138,7 +119,7 @@ public class DocumentDB implements DocumentStore {
             }
             return true;
         } catch (Exception e) {
-            throw new DocumentDBException("Failed to update document in collection: " + collectionName, e);
+            throw new MongoDBException("Failed to update document in collection: " + collectionName, e);
         }
     }
 
@@ -153,13 +134,13 @@ public class DocumentDB implements DocumentStore {
             }
             return true;
         } catch (Exception e) {
-            throw new DocumentDBException("Failed to delete document from collection: " + collectionName, e);
+            throw new MongoDBException("Failed to delete document from collection: " + collectionName, e);
         }
     }
 
     @ExceptionHandler
-    public ResponseEntity<DocumentDBErrorResponse> handleException(DocumentDBException exception) {
-        DocumentDBErrorResponse errorResponse = new DocumentDBErrorResponse(
+    public ResponseEntity<MongoDBErrorResponse> handleException(MongoDBException exception) {
+        MongoDBErrorResponse errorResponse = new MongoDBErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 exception.getMessage(),
                 System.currentTimeMillis()
@@ -168,8 +149,8 @@ public class DocumentDB implements DocumentStore {
     }
 
     @ExceptionHandler
-    public ResponseEntity<DocumentDBErrorResponse> handleException(Exception exception) {
-        DocumentDBErrorResponse errorResponse = new DocumentDBErrorResponse(
+    public ResponseEntity<MongoDBErrorResponse> handleException(Exception exception) {
+        MongoDBErrorResponse errorResponse = new MongoDBErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 exception.getMessage(),
                 System.currentTimeMillis()
