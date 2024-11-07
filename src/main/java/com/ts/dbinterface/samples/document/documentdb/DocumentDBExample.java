@@ -1,6 +1,6 @@
 package com.ts.dbinterface.samples.document.documentdb;
 
-import com.ts.dbinterface.samples.document.documentdb.dao.UserDAO;
+import com.ts.dbinterface.samples.document.documentdb.dao.UserDAODocumentDB;
 import com.ts.dbinterface.samples.document.documentdb.entity.DocumentDBCluster;
 import com.ts.dbinterface.samples.document.documentdb.entity.DocumentDBCollection;
 import com.ts.dbinterface.samples.document.documentdb.ops.DocumentDBOps;
@@ -17,7 +17,7 @@ public class DocumentDBExample {
     }
 
     @Bean
-    public CommandLineRunner commandLineRunner(DocumentDBOps documentDBOps, UserDAO userDAO) {
+    public CommandLineRunner commandLineRunner(DocumentDBOps documentDBOps, UserDAODocumentDB userDAO) {
         return runner -> {
 //            cluster operations
             System.out.println(documentDBOps.createDBCluster(new DocumentDBCluster()));

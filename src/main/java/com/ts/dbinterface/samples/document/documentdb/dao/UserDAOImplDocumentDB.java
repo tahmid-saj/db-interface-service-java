@@ -9,13 +9,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class UserDAOImpl implements UserDAO {
+public class UserDAOImplDocumentDB implements UserDAODocumentDB {
 
     private DocumentDB documentDB;
     private DocumentDBCollection documentDBCollection;
 
     @Autowired
-    public UserDAOImpl(DocumentDB documentDB) {
+    public UserDAOImplDocumentDB(DocumentDB documentDB) {
         this.documentDB = documentDB;
         this.documentDBCollection = new DocumentDBCollection();
     }
