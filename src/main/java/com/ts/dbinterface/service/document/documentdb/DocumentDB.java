@@ -6,6 +6,8 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.ts.dbinterface.service.document.documentdb.DocumentStore;
+import com.ts.dbinterface.utils.exceptions.document.documentdb.DocumentDBErrorResponse;
+import com.ts.dbinterface.utils.exceptions.document.documentdb.DocumentDBException;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
