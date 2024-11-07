@@ -5,7 +5,7 @@ import com.ts.dbinterface.validation.relational.rds.RDSTableName;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-public class RDSTableValidator implements ConstraintValidator<RDSTableName, String> {
+public class RDSDBValidator implements ConstraintValidator<RDSTableName, String> {
 
     public static final String VALID_PATTERN = "^[0-9a-zA-Z_-]*$";
 
