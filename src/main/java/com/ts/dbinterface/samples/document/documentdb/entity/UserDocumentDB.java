@@ -5,14 +5,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Lazy
-public class User {
+public class UserDocumentDB {
     private String userID;
 
     private String userFullName;
 
     private String userEmail;
 
-    public User(String userID, String userFullName, String userEmail) {
+    public UserDocumentDB(String userID, String userFullName, String userEmail) {
         this.userID = userID;
         this.userFullName = userFullName;
         this.userEmail = userEmail;

@@ -4,7 +4,7 @@ import org.bson.Document;
 
 import java.util.List;
 
-public interface UserDAO {
+public interface UserDAODocumentDB {
 
     List<Document> findAll();
 
