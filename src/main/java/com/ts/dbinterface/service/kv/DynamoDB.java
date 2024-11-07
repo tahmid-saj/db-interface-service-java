@@ -6,6 +6,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.model.*;
 import com.ts.dbinterface.utils.exceptions.kv.dynamodb.DynamoDBErrorResponse;
 import com.ts.dbinterface.utils.exceptions.kv.dynamodb.DynamoDBException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class DynamoDB implements KeyValueStore {
     private final AmazonDynamoDB ddb;
 
     // Constructor injection for AmazonDynamoDB
+    @Autowired
     public DynamoDB() {
         AmazonDynamoDB client = null;
         try {
