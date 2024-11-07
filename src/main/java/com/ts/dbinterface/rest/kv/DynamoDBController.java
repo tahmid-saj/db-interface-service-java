@@ -1,14 +1,12 @@
 package com.ts.dbinterface.rest.kv;
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.ts.dbinterface.service.kv.DynamoDB;
+import com.ts.dbinterface.service.kv.dynamodb.DynamoDB;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
