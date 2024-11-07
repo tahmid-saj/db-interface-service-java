@@ -1,4 +1,4 @@
-package com.ts.dbinterface.service.relational;
+package com.ts.dbinterface.service.relational.rds;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.rds.AmazonRDS;
