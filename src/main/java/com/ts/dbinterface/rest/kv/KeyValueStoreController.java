@@ -1,10 +1,10 @@
-package com.ts.dbinterface.rest.relational.rds;
+package com.ts.dbinterface.rest.kv;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/relational")
-public class RelationalController {
+@RequestMapping("/kv")
+public class KeyValueStoreController {
 
 }
