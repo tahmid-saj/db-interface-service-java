@@ -17,14 +17,4 @@ public class Main {
 		SpringApplication.run(Main.class, args);
 	}
 
-	@Bean
-	public CommandLineRunner commandLineRunner(RDS rds) {
-		return runner -> {
-//			rds.createDBInstance("test-db-1", "db.t3.micro", "postgres", 20);
-//			rds.deleteDBInstance("test-db");
-			System.out.println(rds.describeDBInstance("test-db"));
-//			rds.modifyDBInstance("test-db", "db.t3.micro", 20);
-//			rds.rebootDBInstance("test-db");
-		};
-	}
 }

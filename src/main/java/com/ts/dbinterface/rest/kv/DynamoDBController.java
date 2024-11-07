@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
-@RestController()
+@RestController
 @RequestMapping("/kv/dynamodb")
 public class DynamoDBController {
 
