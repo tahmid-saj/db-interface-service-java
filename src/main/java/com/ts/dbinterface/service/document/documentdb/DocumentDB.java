@@ -46,7 +46,6 @@ public class DocumentDB implements DocumentStore {
     }
 
     // Cluster operations
-
     public boolean createDBCluster(String clusterName) {
         // Logic to create a cluster (not usually performed via MongoDB Java client directly)
         System.out.println("Cluster creation initiated for: " + clusterName);
@@ -66,7 +65,6 @@ public class DocumentDB implements DocumentStore {
     }
 
     // Collection operations
-
     public boolean createCollection(String collectionName) {
         try {
             database.createCollection(collectionName);
@@ -89,7 +87,6 @@ public class DocumentDB implements DocumentStore {
     }
 
     // Document operations
-
     public List<Document> findAllDocuments(String collectionName) {
         List<Document> documents = new ArrayList<>();
         try {

@@ -1,4 +1,4 @@
-package com.ts.dbinterface.rest.kv;
+package com.ts.dbinterface.rest.kv.dynamodb;
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.ts.dbinterface.service.kv.dynamodb.DynamoDB;
