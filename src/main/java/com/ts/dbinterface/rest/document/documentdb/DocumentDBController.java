@@ -56,26 +56,26 @@ public class DocumentDBController {
     }
 
 //    collection operations
-    @GetMapping("/collections/{collectionName}")
+    @GetMapping("/collections/{collectionName}/documents")
     public List<Document> findAllDocuments(@PathVariable String collectionName) {
         return documentDB.findAllDocuments(collectionName);
     }
 
-    @PostMapping("/collections/{collectionName}/find")
+    @PostMapping("/collections/{collectionName}/documents/find")
     public Document findDocument(@PathVariable String collectionName, @RequestBody Map<String, Object> queryInput) {
         Document query = (Document) queryInput.get("query");
 
         return documentDB.findDocument(collectionName, query);
     }
 
-    @PostMapping("/collections/{collectionName}")
+    @PostMapping("/collections/{collectionName}/documents")
     public boolean createDocument(@PathVariable String collectionName, @RequestBody Map<String, Object> documentInput) {
         Document document = (Document) documentInput.get("document");
 
         return documentDB.createDocument(collectionName, document);
     }
 
-    @PutMapping("/collections/{collectionName}")
+    @PutMapping("/collections/{collectionName}/documents")
     public boolean modifyDocument(@PathVariable String collectionName, @RequestBody Map<String, Object> queryInput, @RequestBody Map<String, Object> updateInput) {
         Document query = (Document) queryInput.get("query");
         Document document = (Document) updateInput.get("update");
@@ -83,7 +83,7 @@ public class DocumentDBController {
         return documentDB.modifyDocument(collectionName, query, document);
     }
 
-    @PostMapping("/collections/{collectionName}/delete")
+    @PutMapping("/collections/{collectionName}/documents/delete")
     public boolean deleteDocument(@PathVariable String collectionName, @RequestBody Map<String, Object> queryInput) {
         Document query = (Document) queryInput.get("query");
 
