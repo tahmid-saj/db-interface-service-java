@@ -25,13 +25,13 @@ public class DocumentDB implements DocumentStore {
     private MongoClient mongoClient;
     private MongoDatabase database;
 
-    @Value("{mongodb.connectionString}")
-    private String mongoDBConnectionString;
+    @Value("{documentdb.connectionString}")
+    private String documentDBConnectionString;
 
     @Autowired
     public DocumentDB() {
         try {
-            ConnectionString connectionString = new ConnectionString(mongoDBConnectionString);
+            ConnectionString connectionString = new ConnectionString(documentDBConnectionString);
             this.mongoClient = MongoClients.create(connectionString);
             this.database = mongoClient.getDatabase(connectionString.getDatabase());
         } catch (Exception e) {
